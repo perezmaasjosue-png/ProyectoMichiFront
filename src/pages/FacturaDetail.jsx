@@ -6,7 +6,7 @@ import EstadoBadge from '../components/EstadoBadge'
 import { formatearFechaHora } from '../utils/format'
 import { useAuth } from '../context/AuthContext'
 
-const URL_IMAGENES = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '')
+const URL_IMAGENES = (import.meta.env.VITE_API_URL || 'https://proyecto-michi-back.vercel.app/api').replace(/\/api$/, '')
 
 function FacturaDetail() {
   const { id } = useParams()
