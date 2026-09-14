@@ -6,8 +6,6 @@ import EstadoBadge from '../components/EstadoBadge'
 import { formatearFechaHora } from '../utils/format'
 import { useAuth } from '../context/AuthContext'
 
-const URL_IMAGENES = (import.meta.env.VITE_API_URL || 'https://proyecto-michi-back.vercel.app/api').replace(/\/api$/, '')
-
 function FacturaDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -19,6 +17,7 @@ function FacturaDetail() {
   const [error, setError] = useState('')
   const [exito, setExito] = useState('')
   const [motivoRechazo, setMotivoRechazo] = useState('')
+  const [imagenUrl, setImagenUrl] = useState('')
 
   const [form, setForm] = useState({
     numeroFactura: '',
@@ -59,6 +58,22 @@ function FacturaDetail() {
     }
     cargar()
   }, [id])
+
+  useEffect(() => {
+    if (!factura?.imageUrl) return
+    let objectUrl = null
+    const urlInterna = factura.imageUrl.replace(/^\/api/, '')
+    api
+      .get(urlInterna, { responseType: 'blob' })
+      .then((res) => {
+        objectUrl = URL.createObjectURL(res.data)
+        setImagenUrl(objectUrl)
+      })
+      .catch(() => setImagenUrl(''))
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [factura?.imageUrl])
 
   const cambiar = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -176,13 +191,15 @@ function FacturaDetail() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="font-semibold mb-4">Imagen de la factura</h2>
           {factura.imageUrl ? (
-            <a href={`${URL_IMAGENES}${factura.imageUrl}`} target="_blank" rel="noreferrer">
+            imagenUrl ? (
               <img
-                src={`${URL_IMAGENES}${factura.imageUrl}`}
+                src={imagenUrl}
                 alt="Factura"
                 className="w-full rounded-lg border border-slate-200"
               />
-            </a>
+            ) : (
+              <p className="text-slate-500 text-sm">Cargando imagen...</p>
+            )
           ) : (
             <p className="text-slate-500 text-sm">Esta factura fue creada manualmente, sin imagen.</p>
           )}
